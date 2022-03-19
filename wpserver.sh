@@ -22,7 +22,7 @@ mkdir $localpath'/nginx'
 mkdir $localpath'/web'
 mkdir $localpath'/mysql'
 
-cat <<EOF > $localpath'/nginx/'nginx.conf
+cat <<'EOF' > $localpath'/nginx/'nginx.conf
 server {
 listen 80;
 listen [::]:80;
