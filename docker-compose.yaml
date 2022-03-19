@@ -4,26 +4,27 @@ services:
   mysql:
     image: mariadb
     volumes:
-      - /Volumes/EXTMAC/Docker/wp/data/sql:/var/lib/mysql
+      - ${LOCAL_PATH}/mysql:/var/lib/mysql
     environment:
-      MARIADB_ROOT_PASSWORD: splintx
-      MARIADB_DATABASE: wpdocker_db
-      MARIADB_USER: wpdocker_admin
-      MARIADB_PASSWORD: kubernetes
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_USER_PASS}
     restart: always
 
   wordpress:
     image: wordpress:php8.0-fpm-alpine
     volumes:
-      - /Volumes/EXTMAC/Docker/wp/data/app:/var/www/html
+      - ${LOCAL_PATH}/web:/var/www/html
     depends_on:
       - mysql
     environment:
+      MYSQL_ROOT_PASSWORD: splintx
       WORDPRESS_DB_HOST: mysql
-      WORDPRESS_DB_USER: wpdocker_admin
-      WORDPRESS_DB_PASSWORD: kubernetes
-      WORDPRESS_DB_NAME: wpdocker_db
-      WORDPRESS_TABLE_PREFIX: wpd_
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_USER_PASS}
+      WORDPRESS_DB_NAME: ${DB_NAME}
+      WORDPRESS_TABLE_PREFIX: ${WP_PREFIX}
     links:
       - mysql
     restart: always
@@ -31,8 +32,8 @@ services:
   nginx:
     image: nginx:alpine
     volumes:
-      - /Volumes/EXTMAC/Docker/wp/data/nginx:/etc/nginx/conf.d
-      - /Volumes/EXTMAC/Docker/wp/data/app:/var/www/html
+      - ${LOCAL_PATH}/nginx:/etc/nginx/conf.d
+      - ${LOCAL_PATH}/web:/var/www/html
     ports:
       - 8080:80
     links:
