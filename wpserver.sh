@@ -1,8 +1,5 @@
 #!/bin/sh
 
-echo "Where do you want to save the WordPress Files? (e.g. /Users/xxxxx/Desktop/app/data)"
-read localpath
-
 echo "What should be the MariaDB Root Password?"
 read dbrootpass
 
@@ -18,11 +15,12 @@ read dbuserpass
 echo "What should be the WordPress Table Prefix? (e.g. wp_)"
 read wpdbprefix
 
-mkdir $localpath'/nginx'
-mkdir $localpath'/web'
-mkdir $localpath'/mysql'
+mkdir wpinstance
+mkdir ${PWD}'/wpinstance/nginx'
+mkdir ${PWD}'/wpinstance/web'
+mkdir ${PWD}'/wpinstance/mysql'
 
-cat <<'EOF' > $localpath'/nginx/'nginx.conf
+cat <<'EOF' > ${PWD}'/wpinstance/nginx/'nginx.conf
 server {
 listen 80;
 listen [::]:80;
@@ -48,5 +46,22 @@ location ~ \.php$ {
 }
 EOF
 
-DB_ROOT_PASS=$dbrootpass DB_NAME=$dbname DB_USER=$dbuser DB_USER_PASS=$dbuserpass WP_PREFIX=$wpdbprefix LOCAL_PATH=$localpath docker-compose up -d
+DB_ROOT_PASS=$dbrootpass DB_NAME=$dbname DB_USER=$dbuser DB_USER_PASS=$dbuserpass WP_PREFIX=$wpdbprefix LOCAL_PATH=${PWD}/wpinstance docker-compose up -d
 
+for (( i=30; i>0; i--)); do
+  sleep 1 &
+  printf "Preparing the nginx Server: $i Second(s) left... \r"
+  wait
+done
+
+cat << "EOF"
+  ____        _      _      _____             _              __          _______     _____                          
+ / __ \      (_)    | |    |  __ \           | |             \ \        / /  __ \   / ____|                         
+| |  | |_   _ _  ___| | __ | |  | | ___   ___| | _____ _ __   \ \  /\  / /| |__) | | (___   ___ _ ____   _____ _ __ 
+| |  | | | | | |/ __| |/ / | |  | |/ _ \ / __| |/ / _ \ '__|   \ \/  \/ / |  ___/   \___ \ / _ \ '__\ \ / / _ \ '__|
+| |__| | |_| | | (__|   <  | |__| | (_) | (__|   <  __/ |       \  /\  /  | |       ____) |  __/ |   \ V /  __/ |   
+ \___\_\\__,_|_|\___|_|\_\ |_____/ \___/ \___|_|\_\___|_|        \/  \/   |_|      |_____/ \___|_|    \_/ \___|_|   
+EOF
+
+echo "Ready for launch!"
+echo "Visit: http://localhost:8080"
